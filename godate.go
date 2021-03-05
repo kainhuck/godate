@@ -1,6 +1,11 @@
 package godate
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+)
 
 var (
 	MonthArray         = [12]bool{true, false, true, false, true, false, true, true, false, true, false, true}
@@ -23,8 +28,8 @@ var BirthDay = &Date{
 }
 
 func NewDate(year int, month int, day int) *Date {
-	Assert(month > 0 && month < 13, "The number of months is out of the range")
-	Assert(day > 0 && day < 32, "The number of days is out of the range")
+	assert(month > 0 && month < 13, "The number of months is out of the range")
+	assert(day > 0 && day < 32, "The number of days is out of the range")
 	return &Date{
 		Year:  year,
 		Month: month,
@@ -32,11 +37,26 @@ func NewDate(year int, month int, day int) *Date {
 	}
 }
 
+func NewDateByStr(dateStr string) *Date{
+	var (
+		year int
+		month int
+		day int
+	)
+	dateSlice := strings.Split(dateStr, "-")
+	assert(len(dateSlice)==3, "the length of date must be 3")
+	year = wrapFuncIntErr(strconv.Atoi(dateSlice[0]))
+	month = wrapFuncIntErr(strconv.Atoi(dateSlice[1]))
+	day = wrapFuncIntErr(strconv.Atoi(dateSlice[2]))
+
+	return NewDate(year, month, day)
+}
+
 // return by string with format string or not
-func (d *Date) String(format ...string) string {
+func (d *Date) String(layout ...string) string {
 	var formatString = "%d/%d/%d"
-	if len(format) > 0 {
-		formatString = format[0]
+	if len(layout) > 0 {
+		formatString = layout[0]
 	}
 
 	return fmt.Sprintf(formatString, d.Year, d.Month, d.Day)
@@ -60,7 +80,7 @@ func (d *Date) Copy(x *Date) {
 
 // add x days
 func (d *Date) AddDay(x int) {
-	Assert(x >= 0, "x must > 0")
+	assert(x >= 0, "x must > 0")
 	days := d.DaysOfYear() + x
 	d.Month, d.Day = 1, 1
 	for days > d.Days() {
@@ -91,7 +111,7 @@ func (d *Date) SubDate(x *Date) int {
 
 // sub x days
 func (d *Date) SubDay(x int) {
-	Assert(x >= 0, "x must > 0")
+	assert(x >= 0, "x must > 0")
 	days := d.DaysOfYear() - x - 1
 	d.Month, d.Day = 1, 1
 
@@ -107,12 +127,13 @@ func (d *Date) SubDay(x int) {
 func (d *Date) Week() string {
 	// 2021/3/5 -> Friday
 	days := d.SubDate(BirthDay)
-	if days < 0 {
-		days = -days
+
+	result := days%7
+	if result < 0{
+		result += 7
 	}
 
-	fmt.Println(days, days%7)
-	return WeekArray[days%7]
+	return WeekArray[result]
 }
 
 // return if this year is leap year
@@ -180,10 +201,10 @@ func TurnDaysToDate(days int, year int) *Date {
 	}
 	monthDay := ALeapMonthDayArray
 	if d.IsLeap() {
-		Assert(days <= 365 && days > 0, "leap year is 365 days")
+		assert(days <= 365 && days > 0, "leap year is 365 days")
 		monthDay = LeapMonthDayArray
 	} else {
-		Assert(days <= 366 && days > 0, "a leap year is 366 days")
+		assert(days <= 366 && days > 0, "a leap year is 366 days")
 	}
 
 	for i := 1; i <= 12; i++ {
@@ -198,4 +219,10 @@ func TurnDaysToDate(days int, year int) *Date {
 	d.Day = days
 
 	return d
+}
+
+
+func Today() *Date{
+	t := time.Now()
+	return NewDateByStr(strings.Split(t.String(), " ")[0])
 }
