@@ -23,8 +23,8 @@ var BirthDay = &Date{
 }
 
 func NewDate(year int, month int, day int) *Date {
-	Assert(month > 0 && month < 13, "月数不在合理范围内")
-	Assert(day > 0 && day < 32, "日数不在合理范围内")
+	Assert(month > 0 && month < 13, "The number of months is out of the range")
+	Assert(day > 0 && day < 32, "The number of days is out of the range")
 	return &Date{
 		Year:  year,
 		Month: month,
@@ -32,7 +32,7 @@ func NewDate(year int, month int, day int) *Date {
 	}
 }
 
-// 以字符串的形式返回
+// return by string with format string or not
 func (d *Date) String(format ...string) string {
 	var formatString = "%d/%d/%d"
 	if len(format) > 0 {
@@ -42,15 +42,25 @@ func (d *Date) String(format ...string) string {
 	return fmt.Sprintf(formatString, d.Year, d.Month, d.Day)
 }
 
+// add one day
+func (d *Date) Increase() {
+	d.AddDay(1)
+}
+
+// sub one day
+func (d *Date) Reduce() {
+	d.SubDay(1)
+}
+
 func (d *Date) Copy(x *Date) {
 	d.Year = x.Year
 	d.Month = x.Month
 	d.Day = x.Day
 }
 
-// 加几天
+// add x days
 func (d *Date) AddDay(x int) {
-	Assert(x >= 0, "x 必须大于0")
+	Assert(x >= 0, "x must > 0")
 	days := d.DaysOfYear() + x
 	d.Month, d.Day = 1, 1
 	for days > d.Days() {
@@ -61,7 +71,7 @@ func (d *Date) AddDay(x int) {
 	d.Copy(TurnDaysToDate(days, d.Year))
 }
 
-// 减具体一天 = 时间间隔
+// sub one day
 func (d *Date) SubDate(x *Date) int {
 	if d.Year == x.Year {
 		return d.DaysOfYear() - x.DaysOfYear()
@@ -79,9 +89,9 @@ func (d *Date) SubDate(x *Date) int {
 	}
 }
 
-// 减几天
+// sub x days
 func (d *Date) SubDay(x int) {
-	Assert(x >= 0, "x 必须大于0")
+	Assert(x >= 0, "x must > 0")
 	days := d.DaysOfYear() - x - 1
 	d.Month, d.Day = 1, 1
 
@@ -93,7 +103,7 @@ func (d *Date) SubDay(x int) {
 	d.AddDay(days)
 }
 
-// 返回当天是星期几
+// return What day is it today
 func (d *Date) Week() string {
 	// 2021/3/5 -> Friday
 	days := d.SubDate(BirthDay)
@@ -105,12 +115,12 @@ func (d *Date) Week() string {
 	return WeekArray[days%7]
 }
 
-// 返回今年是否是平年
+// return if this year is leap year
 func (d *Date) IsLeap() bool {
 	return !(d.Year%400 == 0 || (d.Year%4 == 0 && d.Year%100 != 0))
 }
 
-// 返回今年有多少天
+// return the days of this year
 func (d *Date) Days() int {
 	if d.IsLeap() {
 		return 365
@@ -118,10 +128,9 @@ func (d *Date) Days() int {
 	return 366
 }
 
-// 返回这一天是今年的第几天
+// return the days of this year
 func (d *Date) DaysOfYear() int {
 	total := 0
-	// 前面几个月的天数加上这个月的日数
 	for i := 1; i < d.Month; i++ {
 		if isBigMonth(i) {
 			total += 31
@@ -139,25 +148,21 @@ func (d *Date) DaysOfYear() int {
 	return total
 }
 
-// 判断这天是否合理
+// return if this is a right day
 func (d *Date) Check() bool {
-	// 大月肯定是31天
 	if d.IsBigMonth() {
 		return true
 	}
-	// 小月但不是2月肯定是30
 	if d.Month != 2 {
 		return d.Day < 31
 	}
-	// 2月平年28
 	if d.IsLeap() {
 		return d.Day < 29
 	}
-	// 2月闰年29
 	return d.Day < 30
 }
 
-// 判断这个月是大月还是小月
+// return if this month ids big month
 func (d *Date) IsBigMonth() bool {
 	return isBigMonth(d.Month)
 }
@@ -166,7 +171,7 @@ func isBigMonth(m int) bool {
 	return MonthArray[m-1]
 }
 
-// DaysOfYear的反函数
+//
 func TurnDaysToDate(days int, year int) *Date {
 	d := &Date{
 		Year:  year,
@@ -175,10 +180,10 @@ func TurnDaysToDate(days int, year int) *Date {
 	}
 	monthDay := ALeapMonthDayArray
 	if d.IsLeap() {
-		Assert(days <= 365 && days > 0, "平年365天")
+		Assert(days <= 365 && days > 0, "leap year is 365 days")
 		monthDay = LeapMonthDayArray
 	} else {
-		Assert(days <= 366 && days > 0, "闰年366天")
+		Assert(days <= 366 && days > 0, "a leap year is 366 days")
 	}
 
 	for i := 1; i <= 12; i++ {
