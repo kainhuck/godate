@@ -54,7 +54,7 @@ func NewDateByStr(dateStr string) *Date{
 
 // return by string with format string or not
 func (d *Date) String(layout ...string) string {
-	var formatString = "%d/%d/%d"
+	var formatString = "%d-%02d-%02d"
 	if len(layout) > 0 {
 		formatString = layout[0]
 	}

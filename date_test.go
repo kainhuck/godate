@@ -26,6 +26,7 @@ func TestDate(t *testing.T) {
 	d2 := Today()
 	fmt.Println(d2.SubDate(d1))
 
-	fmt.Println(d1.Week())
-	fmt.Println(d2.Week())
+	//fmt.Println(d1.Week())
+	//fmt.Println(d2.Week())
+	fmt.Println(d1.String())
 }

@@ -18,6 +18,10 @@ import (
 func main() {
 	d1 := godate.NewDate(2021, 10, 22)
 	d2 := godate.NewDate(1999, 1, 23)
+	d3 := godate.NewDateByStr("2019-12-01")
+    d4 := godate.Today()
+	fmt.Println(d3.String())
+    fmt.Println(d4.String("%d/%02d/%02d"))
 
 	if !d1.Check() || !d2.Check(){
 		panic("wrong date")
@@ -41,5 +45,9 @@ func main() {
 	fmt.Println(d1.IsLeap())
 
 	fmt.Println(d1.IsBigMonth())
+	
+	fmt.Println(d1.Increase())  // add one day
+	
+	fmt.Println(d1.Reduce()) // sub one day
 }
 ```
