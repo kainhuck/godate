@@ -72,10 +72,14 @@ func (d *Date) Reduce() {
 	d.SubDay(1)
 }
 
-func (d *Date) Copy(x *Date) {
+func (d *Date) copy(x *Date) {
 	d.Year = x.Year
 	d.Month = x.Month
 	d.Day = x.Day
+}
+
+func (d *Date) Equal(x *Date) bool{
+	return d.Year == x.Year && d.Month == x.Month && d.Day == x.Day
 }
 
 // add x days
@@ -88,7 +92,7 @@ func (d *Date) AddDay(x int) {
 		d.Year++
 	}
 
-	d.Copy(TurnDaysToDate(days, d.Year))
+	d.copy(turnDaysToDate(days, d.Year))
 }
 
 // sub one day
@@ -193,7 +197,7 @@ func isBigMonth(m int) bool {
 }
 
 //
-func TurnDaysToDate(days int, year int) *Date {
+func turnDaysToDate(days int, year int) *Date {
 	d := &Date{
 		Year:  year,
 		Month: 1,

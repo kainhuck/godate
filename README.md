@@ -22,6 +22,7 @@ func main() {
     d4 := godate.Today()
 	fmt.Println(d3.String())
     fmt.Println(d4.String("%d/%02d/%02d"))
+    fmt.Println(d1.Equal(d2))
 
 	if !d1.Check() || !d2.Check(){
 		panic("wrong date")
