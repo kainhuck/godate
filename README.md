@@ -23,6 +23,8 @@ func main() {
 	fmt.Println(d3.String())
     fmt.Println(d4.String("%d/%02d/%02d"))
     fmt.Println(d1.Equal(d2))
+    fmt.Println(d1.Early(d2))
+    fmt.Println(d1.Later(d2))
 
 	if !d1.Check() || !d2.Check(){
 		panic("wrong date")

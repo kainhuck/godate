@@ -78,8 +78,20 @@ func (d *Date) copy(x *Date) {
 	d.Day = x.Day
 }
 
+func (d *Date) clone() *Date{
+	return NewDate(d.Year, d.Month, d.Day)
+}
+
 func (d *Date) Equal(x *Date) bool{
-	return d.Year == x.Year && d.Month == x.Month && d.Day == x.Day
+	return d.SubDate(x) == 0
+}
+
+func (d *Date) Early(x *Date) bool{
+	return d.SubDate(x) < 0
+}
+
+func (d *Date)Later(x *Date)bool{
+	return d.SubDate(x) > 0
 }
 
 // add x days
@@ -97,17 +109,18 @@ func (d *Date) AddDay(x int) {
 
 // sub one day
 func (d *Date) SubDate(x *Date) int {
-	if d.Year == x.Year {
-		return d.DaysOfYear() - x.DaysOfYear()
-	} else if d.Year > x.Year {
+	dd := d.clone()
+	if dd.Year == x.Year {
+		return dd.DaysOfYear() - x.DaysOfYear()
+	} else if dd.Year > x.Year {
 		total := 0
 
-		for d.Year > x.Year {
-			total += d.Days()
-			d.Year--
+		for dd.Year > x.Year {
+			total += dd.Days()
+			dd.Year--
 		}
 
-		return d.DaysOfYear() - x.DaysOfYear() + total
+		return dd.DaysOfYear() - x.DaysOfYear() + total
 	} else {
 		return -x.SubDate(d)
 	}

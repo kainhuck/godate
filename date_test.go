@@ -24,9 +24,12 @@ func TestDate(t *testing.T) {
 	//fmt.Println(d.Week())
 	d1 := NewDateByStr("2019-12-1")
 	d2 := Today()
+	d3 := Today()
 	fmt.Println(d2.SubDate(d1))
 
 	//fmt.Println(d1.Week())
 	//fmt.Println(d2.Week())
 	fmt.Println(d1.String())
+
+	fmt.Println(d3.SubDate(d2))
 }
