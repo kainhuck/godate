@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	MonthArray         = [12]bool{true, false, true, false, true, false, true, true, false, true, false, true}
-	WeekArray          = [7]string{"Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"}
-	LeapMonthDayArray  = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
-	ALeapMonthDayArray = [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+	monthArray         = [12]bool{true, false, true, false, true, false, true, true, false, true, false, true}
+	weekArray          = [7]string{"Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"}
+	leapMonthDayArray  = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+	aLeapMonthDayArray = [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 )
 
 type Date struct {
@@ -37,14 +37,14 @@ func NewDate(year int, month int, day int) *Date {
 	}
 }
 
-func NewDateByStr(dateStr string) *Date{
+func NewDateByStr(dateStr string) *Date {
 	var (
-		year int
+		year  int
 		month int
-		day int
+		day   int
 	)
 	dateSlice := strings.Split(dateStr, "-")
-	assert(len(dateSlice)==3, "the length of date must be 3")
+	assert(len(dateSlice) == 3, "the length of date must be 3")
 	year = wrapFuncIntErr(strconv.Atoi(dateSlice[0]))
 	month = wrapFuncIntErr(strconv.Atoi(dateSlice[1]))
 	day = wrapFuncIntErr(strconv.Atoi(dateSlice[2]))
@@ -78,27 +78,27 @@ func (d *Date) copy(x *Date) {
 	d.Day = x.Day
 }
 
-func (d *Date) clone() *Date{
+func (d *Date) clone() *Date {
 	return NewDate(d.Year, d.Month, d.Day)
 }
 
-func (d *Date) Equal(x *Date) bool{
+func (d *Date) Equal(x *Date) bool {
 	return d.SubDate(x) == 0
 }
 
-func (d *Date) Early(x *Date) bool{
+func (d *Date) Early(x *Date) bool {
 	return d.SubDate(x) < 0
 }
 
-func (d *Date)Later(x *Date)bool{
+func (d *Date) Later(x *Date) bool {
 	return d.SubDate(x) > 0
 }
 
-func (d *Date) EarlyEqual(x *Date) bool{
+func (d *Date) EarlyEqual(x *Date) bool {
 	return d.Early(x) && d.Equal(x)
 }
 
-func (d *Date) LaterEqual(x *Date) bool{
+func (d *Date) LaterEqual(x *Date) bool {
 	return d.Later(x) && d.Equal(x)
 }
 
@@ -148,17 +148,25 @@ func (d *Date) SubDay(x int) {
 	d.AddDay(days)
 }
 
+func (d *Date) AddWeek(x int) {
+	d.AddDay(x * 7)
+}
+
+func (d *Date) SubWeek(x int) {
+	d.SubDay(x * 7)
+}
+
 // return What day is it today
 func (d *Date) Week() string {
 	// 2021/3/5 -> Friday
 	days := d.SubDate(BirthDay)
 
-	result := days%7
-	if result < 0{
+	result := days % 7
+	if result < 0 {
 		result += 7
 	}
 
-	return WeekArray[result]
+	return weekArray[result]
 }
 
 // return if this year is leap year
@@ -194,6 +202,14 @@ func (d *Date) DaysOfYear() int {
 	return total
 }
 
+func (d *Date) WeeksOfYear() int {
+	days := d.DaysOfYear()
+	if days%7 != 0 {
+		return days/7 + 1
+	}
+	return days / 7
+}
+
 // return if this is a right day
 func (d *Date) Check() bool {
 	if d.IsBigMonth() {
@@ -214,7 +230,7 @@ func (d *Date) IsBigMonth() bool {
 }
 
 func isBigMonth(m int) bool {
-	return MonthArray[m-1]
+	return monthArray[m-1]
 }
 
 //
@@ -224,10 +240,10 @@ func turnDaysToDate(days int, year int) *Date {
 		Month: 1,
 		Day:   1,
 	}
-	monthDay := ALeapMonthDayArray
+	monthDay := aLeapMonthDayArray
 	if d.IsLeap() {
 		assert(days <= 365 && days > 0, "leap year is 365 days")
-		monthDay = LeapMonthDayArray
+		monthDay = leapMonthDayArray
 	} else {
 		assert(days <= 366 && days > 0, "a leap year is 366 days")
 	}
@@ -246,8 +262,15 @@ func turnDaysToDate(days int, year int) *Date {
 	return d
 }
 
+func (d *Date)Accurate(x int){
+	assert(x > 0 && x <=366, "x in wrong range")
+	if d.IsLeap() && x == 366{
+		panic("x in wrong range")
+	}
+	d.copy(turnDaysToDate(x, d.Year))
+}
 
-func Today() *Date{
+func Today() *Date {
 	t := time.Now()
 	return NewDateByStr(strings.Split(t.String(), " ")[0])
 }

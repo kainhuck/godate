@@ -6,9 +6,8 @@ func assert(condition bool, msg string) {
 	}
 }
 
-
-func wrapFuncIntErr(i int, e error) int{
-	if e != nil{
+func wrapFuncIntErr(i int, e error) int {
+	if e != nil {
 		panic(e)
 	}
 

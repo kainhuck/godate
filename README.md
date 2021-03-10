@@ -25,6 +25,14 @@ func main() {
     fmt.Println(d1.Equal(d2))
     fmt.Println(d1.Early(d2))
     fmt.Println(d1.Later(d2))
+    
+    fmt.Println(d1.EarlyEqual(d2))
+    fmt.Println(d1.LaterEqual(d2))
+    
+    fmt.Println(d1.AddWeek(2))
+    fmt.Println(d1.SubWeek(2))
+    
+    fmt.Println(d1.Accurate(300).String())
 
 	if !d1.Check() || !d2.Check(){
 		panic("wrong date")
