@@ -94,6 +94,14 @@ func (d *Date)Later(x *Date)bool{
 	return d.SubDate(x) > 0
 }
 
+func (d *Date) EarlyEqual(x *Date) bool{
+	return d.Early(x) && d.Equal(x)
+}
+
+func (d *Date) LaterEqual(x *Date) bool{
+	return d.Later(x) && d.Equal(x)
+}
+
 // add x days
 func (d *Date) AddDay(x int) {
 	assert(x >= 0, "x must > 0")
