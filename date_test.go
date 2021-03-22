@@ -22,18 +22,21 @@ func TestDate(t *testing.T) {
 	//d := NewDateByStr("2021-3-6")
 	//fmt.Println(d.Week())
 	d1 := NewDateByStr("2019-12-1")
-	d2 := Today()
-	d3 := Today()
-	fmt.Println(d2.SubDate(d1))
-	fmt.Println(d1.WeeksOfYear())
-	fmt.Println(d1.DaysOfYear())
-	d1.Accurate(329)
-	fmt.Println(d1.String())
-	fmt.Println(d1.WeeksOfYear())
-
-	//fmt.Println(d1.Week())
-	//fmt.Println(d2.Week())
+	//d2 := Today()
+	//fmt.Println(d2.SubDate(d1))
+	//
+	//d1.AddDay(500)
 	//fmt.Println(d1.String())
-
-	fmt.Println(d3.SubDate(d2))
+	//fmt.Println(d1.Week())
+	c := 0
+	i := 100
+	for c < 10 {
+		d1.AddDay(i)
+		if d1.Week() == "Saturday" || d1.Week() == "Sunday" {
+			fmt.Printf("我们在一起的第%d是%s,这一天是%s\n", i, d1.String(), d1.Week())
+			c++
+		}
+		d1.SubDay(i)
+		i += 100
+	}
 }

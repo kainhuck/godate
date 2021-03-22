@@ -14,6 +14,16 @@ var (
 	aLeapMonthDayArray = [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 )
 
+const (
+	Monday    = "Monday"
+	Tuesday   = "Tuesday"
+	Wednesday = "Wednesday"
+	Thursday  = "Thursday"
+	Friday    = "Friday"
+	Saturday  = "Saturday"
+	Sunday    = "Sunday"
+)
+
 type Date struct {
 	Year  int
 	Month int
@@ -262,9 +272,9 @@ func turnDaysToDate(days int, year int) *Date {
 	return d
 }
 
-func (d *Date)Accurate(x int){
-	assert(x > 0 && x <=366, "x in wrong range")
-	if d.IsLeap() && x == 366{
+func (d *Date) Accurate(x int) {
+	assert(x > 0 && x <= 366, "x in wrong range")
+	if d.IsLeap() && x == 366 {
 		panic("x in wrong range")
 	}
 	d.copy(turnDaysToDate(x, d.Year))
