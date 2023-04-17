@@ -28,35 +28,45 @@ type Date struct {
 	Day   int
 }
 
-// this is th datetime when i create this project
+// BirthDay this is th datetime when i create this project
 var BirthDay = &Date{
 	Year:  2021,
 	Month: 3,
 	Day:   5,
 }
 
-func NewDate(year int, month int, day int) *Date {
-	assert(month > 0 && month < 13, "The number of months is out of the range")
-	assert(day > 0 && day < 32, "The number of days is out of the range")
+func NewDate(year int, month int, day int) (*Date, error) {
+	if month <= 0 || month >= 13 {
+		return nil, fmt.Errorf("the number of months is out of the range")
+	}
+	if day <= 0 || day >= 32 {
+		return nil, fmt.Errorf("the number of days is out of the range")
+	}
+
 	return &Date{
 		Year:  year,
 		Month: month,
 		Day:   day,
-	}
+	}, nil
 }
 
 func NewDateByStr(dateStr string, layout ...string) (*Date, error) {
+	var (
+		year  int
+		month int
+		day   int
+	)
+
 	var formatString = "%d-%02d-%02d"
 	if len(layout) > 0 {
 		formatString = layout[0]
 	}
-	t, err := time.Parse(formatString, dateStr)
-	if err != nil {
+
+	if _, err := fmt.Sscanf(dateStr, formatString, &year, &month, &day); err != nil {
 		return nil, err
 	}
-	year, month, day := t.Date()
 
-	return NewDate(year, int(month), day), nil
+	return NewDate(year, month, day)
 }
 
 // return by string with format string or not
@@ -86,7 +96,9 @@ func (d *Date) copy(x *Date) {
 }
 
 func (d *Date) clone() *Date {
-	return NewDate(d.Year, d.Month, d.Day)
+	d1, _ := NewDate(d.Year, d.Month, d.Day)
+
+	return d1
 }
 
 func (d *Date) Equal(x *Date) bool {
@@ -279,8 +291,9 @@ func (d *Date) Accurate(x int) {
 func Today() *Date {
 	t := time.Now()
 	year, month, day := t.Date()
+	d, _ := NewDate(year, int(month), day)
 
-	return NewDate(year, int(month), day)
+	return d
 }
 
 func (d *Date) IsToday() bool {

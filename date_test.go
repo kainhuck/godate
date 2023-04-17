@@ -2,6 +2,7 @@ package godate
 
 import (
 	"fmt"
+	"log"
 	"testing"
 )
 
@@ -21,7 +22,10 @@ func TestDate(t *testing.T) {
 
 	//d := NewDateByStr("2021-3-6")
 	//fmt.Println(d.Week())
-	d1 := NewDateByStr("2019-12-1")
+	d1, err := NewDateByStr("2019-12-1")
+	if err != nil {
+		log.Fatal(err)
+	}
 	//d2 := Today()
 	//fmt.Println(d2.SubDate(d1))
 	//
@@ -33,7 +37,7 @@ func TestDate(t *testing.T) {
 	for c < 10 {
 		d1.AddDay(i)
 		if d1.Week() == "Saturday" || d1.Week() == "Sunday" {
-			fmt.Printf("我们在一起的第%d是%s,这一天是%s\n", i, d1.String(), d1.Week())
+			fmt.Printf("我们在一起的第%d天是%s,这一天是%s\n", i, d1.String(), d1.Week())
 			c++
 		}
 		d1.SubDay(i)
