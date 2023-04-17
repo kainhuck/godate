@@ -36,7 +36,7 @@ func TestDate(t *testing.T) {
 	i := 100
 	for c < 10 {
 		d1.AddDay(i)
-		if d1.Week() == "Saturday" || d1.Week() == "Sunday" {
+		if d1.Week() == Saturday || d1.Week() == Sunday {
 			fmt.Printf("我们在一起的第%d天是%s,这一天是%s\n", i, d1.String(), d1.Week())
 			c++
 		}
