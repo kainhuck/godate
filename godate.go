@@ -284,3 +284,7 @@ func Today() *Date {
 	t := time.Now()
 	return NewDateByStr(strings.Split(t.String(), " ")[0])
 }
+
+func (d *Date) IsTody() bool {
+	return d.Equal(Today())
+}
