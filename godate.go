@@ -179,9 +179,9 @@ func (d *Date) Week() string {
 	return weekArray[result]
 }
 
-// return if this year is leap year
+// return true if this year is leap year
 func (d *Date) IsLeap() bool {
-	return !(d.Year%400 == 0 || (d.Year%4 == 0 && d.Year%100 != 0))
+	return d.Year%400 == 0 || (d.Year%4 == 0 && d.Year%100 != 0)
 }
 
 // return the days of this year
