@@ -2,8 +2,6 @@ package godate
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -47,19 +45,18 @@ func NewDate(year int, month int, day int) *Date {
 	}
 }
 
-func NewDateByStr(dateStr string) *Date {
-	var (
-		year  int
-		month int
-		day   int
-	)
-	dateSlice := strings.Split(dateStr, "-")
-	assert(len(dateSlice) == 3, "the length of date must be 3")
-	year = wrapFuncIntErr(strconv.Atoi(dateSlice[0]))
-	month = wrapFuncIntErr(strconv.Atoi(dateSlice[1]))
-	day = wrapFuncIntErr(strconv.Atoi(dateSlice[2]))
+func NewDateByStr(dateStr string, layout ...string) (*Date, error) {
+	var formatString = "%d-%02d-%02d"
+	if len(layout) > 0 {
+		formatString = layout[0]
+	}
+	t, err := time.Parse(formatString, dateStr)
+	if err != nil {
+		return nil, err
+	}
+	year, month, day := t.Date()
 
-	return NewDate(year, month, day)
+	return NewDate(year, int(month), day), nil
 }
 
 // return by string with format string or not
@@ -243,7 +240,6 @@ func isBigMonth(m int) bool {
 	return monthArray[m-1]
 }
 
-//
 func turnDaysToDate(days int, year int) *Date {
 	d := &Date{
 		Year:  year,
@@ -282,7 +278,9 @@ func (d *Date) Accurate(x int) {
 
 func Today() *Date {
 	t := time.Now()
-	return NewDateByStr(strings.Split(t.String(), " ")[0])
+	year, month, day := t.Date()
+
+	return NewDate(year, int(month), day)
 }
 
 func (d *Date) IsToday() bool {
