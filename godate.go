@@ -285,6 +285,6 @@ func Today() *Date {
 	return NewDateByStr(strings.Split(t.String(), " ")[0])
 }
 
-func (d *Date) IsTody() bool {
+func (d *Date) IsToday() bool {
 	return d.Equal(Today())
 }
