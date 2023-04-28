@@ -44,3 +44,18 @@ func TestDate(t *testing.T) {
 		i += 100
 	}
 }
+
+func TestNewDate(t *testing.T) {
+	day, _ := NewDate(2020, 4, 28)
+
+	fmt.Println(day.String())
+	//day.SubDay(1244)
+	//fmt.Println(day.String())
+	//day.AddDay(1)
+	//fmt.Println(day.String())
+
+	d1, _ := NewDate(1992, 4, 11)
+	//
+	fmt.Println(day.SubDate(d1))
+	fmt.Println(d1.String())
+}

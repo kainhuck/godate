@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	monthArray         = [12]bool{true, false, true, false, true, false, true, true, false, true, false, true}
-	weekArray          = [7]string{Friday, Saturday, Sunday, Monday, Tuesday, Wednesday, Thursday}
-	leapMonthDayArray  = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
-	aLeapMonthDayArray = [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+	monthArray          = [12]bool{true, false, true, false, true, false, true, true, false, true, false, true}
+	weekArray           = [7]string{Friday, Saturday, Sunday, Monday, Tuesday, Wednesday, Thursday}
+	commonMonthDayArray = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} // common year
+	leapMonthDayArray   = [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} // leap year
 )
 
 const (
@@ -122,16 +122,8 @@ func (d *Date) LaterThanOrEqual(x *Date) bool {
 }
 
 // AddDay add x days
-func (d *Date) AddDay(x int) {
-	assert(x >= 0, "x must > 0")
-	days := d.DaysOfYear() + x
-	d.Month, d.Day = 1, 1
-	for days > d.Days() {
-		days -= d.Days()
-		d.Year++
-	}
-
-	d.copy(turnDaysToDate(days, d.Year))
+func (d *Date) AddDay(days int) {
+	d.copy(turnDaysToDate(d.DaysOfYear()+days-1, d.Year))
 }
 
 // SubDate sub one day
@@ -154,25 +146,16 @@ func (d *Date) SubDate(x *Date) int {
 }
 
 // SubDay sub x days
-func (d *Date) SubDay(x int) {
-	assert(x >= 0, "x must > 0")
-	days := d.DaysOfYear() - x - 1
-	d.Month, d.Day = 1, 1
-
-	for days <= 0 {
-		d.Year--
-		days += d.Days()
-	}
-
-	d.AddDay(days)
+func (d *Date) SubDay(days int) {
+	d.copy(turnDaysToDate(d.DaysOfYear()-days-1, d.Year))
 }
 
-func (d *Date) AddWeek(x int) {
-	d.AddDay(x * 7)
+func (d *Date) AddWeek(weeks int) {
+	d.AddDay(weeks * 7)
 }
 
-func (d *Date) SubWeek(x int) {
-	d.SubDay(x * 7)
+func (d *Date) SubWeek(weeks int) {
+	d.SubDay(weeks * 7)
 }
 
 // Week return what day is it today
@@ -196,9 +179,9 @@ func (d *Date) IsLeap() bool {
 // Days return the days of this year
 func (d *Date) Days() int {
 	if d.IsLeap() {
-		return 365
+		return 366
 	}
-	return 366
+	return 365
 }
 
 // DaysOfYear return the days of this year
@@ -258,34 +241,82 @@ func turnDaysToDate(days int, year int) *Date {
 		Month: 1,
 		Day:   1,
 	}
-	monthDay := aLeapMonthDayArray
-	if d.IsLeap() {
-		assert(days <= 365 && days > 0, "leap year is 365 days")
-		monthDay = leapMonthDayArray
-	} else {
-		assert(days <= 366 && days > 0, "a leap year is 366 days")
+
+	if days == 1 {
+		return d
 	}
 
-	for i := 1; i <= 12; i++ {
-		if days > monthDay[i-1] {
-			d.Month++
-			days -= monthDay[i-1]
+	if days > 0 {
+		if d.IsLeap() && days > 366 {
+			return turnDaysToDate(days-366, year+1)
+		}
+		if !d.IsLeap() && days > 365 {
+			return turnDaysToDate(days-365, year+1)
+		}
+
+		monthDay := commonMonthDayArray
+		if d.IsLeap() {
+			monthDay = leapMonthDayArray
+		}
+
+		for i := 1; i <= 12; i++ {
+			if days > monthDay[i-1] {
+				d.Month++
+				days -= monthDay[i-1]
+			} else {
+				break
+			}
+		}
+
+		d.Day = days
+
+		return d
+
+	}
+
+	d = &Date{
+		Year:  year - 1,
+		Month: 12,
+		Day:   31,
+	}
+
+	if days == 0 {
+		return d
+	}
+
+	if d.IsLeap() && -days > 366 {
+		return turnDaysToDate(days+366, d.Year)
+	}
+
+	if !d.IsLeap() && -days > 365 {
+		return turnDaysToDate(days+365, d.Year)
+	}
+
+	monthDay := commonMonthDayArray
+	if d.IsLeap() {
+		monthDay = leapMonthDayArray
+	}
+
+	i := 11
+
+	for i > 0 {
+		if -days > monthDay[i] {
+			d.Month--
+			days += monthDay[i]
 		} else {
 			break
 		}
+
+		i--
 	}
 
-	d.Day = days
+	d.Day = monthDay[i] + days
 
 	return d
 }
 
-func (d *Date) Accurate(x int) {
-	assert(x > 0 && x <= 366, "x in wrong range")
-	if d.IsLeap() && x == 366 {
-		panic("x in wrong range")
-	}
-	d.copy(turnDaysToDate(x, d.Year))
+func (d *Date) Accurate(days int) {
+	d.copy(turnDaysToDate(days, d.Year))
 }
 
 func Today() *Date {
@@ -298,4 +329,18 @@ func Today() *Date {
 
 func (d *Date) IsToday() bool {
 	return d.Equal(Today())
+}
+
+// BeginOfThisYear return the first day of this year
+func (d *Date) BeginOfThisYear() *Date {
+	d1, _ := NewDate(d.Year, 1, 1)
+
+	return d1
+}
+
+// BeginOfThisMonth return the first day of this month
+func (d *Date) BeginOfThisMonth() *Date {
+	d1, _ := NewDate(d.Year, d.Month, 1)
+
+	return d1
 }
