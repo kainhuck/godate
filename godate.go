@@ -50,33 +50,33 @@ func NewDate(year int, month int, day int) (*Date, error) {
 	}, nil
 }
 
+// NewDateFromStr
+// layout can be 2006-01-02 ...
 func NewDateFromStr(dateStr string, layout ...string) (*Date, error) {
-	var (
-		year  int
-		month int
-		day   int
-	)
 
-	var formatString = "%d-%02d-%02d"
+	var formatString = "2006-01-02"
 	if len(layout) > 0 {
 		formatString = layout[0]
 	}
 
-	if _, err := fmt.Sscanf(dateStr, formatString, &year, &month, &day); err != nil {
+	t, err := time.Parse(formatString, dateStr)
+	if err != nil {
 		return nil, err
 	}
 
-	return NewDate(year, month, day)
+	return NewDate(t.Year(), int(t.Month()), t.Day())
 }
 
 // String return by string with format string or not
 func (d *Date) String(layout ...string) string {
-	var formatString = "%d-%02d-%02d"
+	t := time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC)
+	format := "2006-01-02"
+
 	if len(layout) > 0 {
-		formatString = layout[0]
+		format = layout[0]
 	}
 
-	return fmt.Sprintf(formatString, d.Year, d.Month, d.Day)
+	return t.Format(format)
 }
 
 // Increase add one day
