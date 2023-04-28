@@ -7,7 +7,7 @@ import (
 
 var (
 	monthArray         = [12]bool{true, false, true, false, true, false, true, true, false, true, false, true}
-	weekArray          = [7]string{"Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"}
+	weekArray          = [7]string{Friday, Saturday, Sunday, Monday, Tuesday, Wednesday, Thursday}
 	leapMonthDayArray  = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	aLeapMonthDayArray = [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 )
@@ -50,7 +50,7 @@ func NewDate(year int, month int, day int) (*Date, error) {
 	}, nil
 }
 
-func NewDateByStr(dateStr string, layout ...string) (*Date, error) {
+func NewDateFromStr(dateStr string, layout ...string) (*Date, error) {
 	var (
 		year  int
 		month int
@@ -69,7 +69,7 @@ func NewDateByStr(dateStr string, layout ...string) (*Date, error) {
 	return NewDate(year, month, day)
 }
 
-// return by string with format string or not
+// String return by string with format string or not
 func (d *Date) String(layout ...string) string {
 	var formatString = "%d-%02d-%02d"
 	if len(layout) > 0 {
@@ -79,13 +79,13 @@ func (d *Date) String(layout ...string) string {
 	return fmt.Sprintf(formatString, d.Year, d.Month, d.Day)
 }
 
-// add one day
+// Increase add one day
 func (d *Date) Increase() {
 	d.AddDay(1)
 }
 
-// sub one day
-func (d *Date) Reduce() {
+// Decrease sub one day
+func (d *Date) Decrease() {
 	d.SubDay(1)
 }
 
@@ -105,23 +105,23 @@ func (d *Date) Equal(x *Date) bool {
 	return d.SubDate(x) == 0
 }
 
-func (d *Date) Early(x *Date) bool {
+func (d *Date) EarlyThan(x *Date) bool {
 	return d.SubDate(x) < 0
 }
 
-func (d *Date) Later(x *Date) bool {
+func (d *Date) LaterThan(x *Date) bool {
 	return d.SubDate(x) > 0
 }
 
-func (d *Date) EarlyEqual(x *Date) bool {
-	return d.Early(x) && d.Equal(x)
+func (d *Date) EarlyThanOrEqual(x *Date) bool {
+	return d.EarlyThan(x) && d.Equal(x)
 }
 
-func (d *Date) LaterEqual(x *Date) bool {
-	return d.Later(x) && d.Equal(x)
+func (d *Date) LaterThanOrEqual(x *Date) bool {
+	return d.LaterThan(x) && d.Equal(x)
 }
 
-// add x days
+// AddDay add x days
 func (d *Date) AddDay(x int) {
 	assert(x >= 0, "x must > 0")
 	days := d.DaysOfYear() + x
@@ -134,7 +134,7 @@ func (d *Date) AddDay(x int) {
 	d.copy(turnDaysToDate(days, d.Year))
 }
 
-// sub one day
+// SubDate sub one day
 func (d *Date) SubDate(x *Date) int {
 	dd := d.clone()
 	if dd.Year == x.Year {
@@ -153,7 +153,7 @@ func (d *Date) SubDate(x *Date) int {
 	}
 }
 
-// sub x days
+// SubDay sub x days
 func (d *Date) SubDay(x int) {
 	assert(x >= 0, "x must > 0")
 	days := d.DaysOfYear() - x - 1
@@ -175,7 +175,7 @@ func (d *Date) SubWeek(x int) {
 	d.SubDay(x * 7)
 }
 
-// return What day is it today
+// Week return what day is it today
 func (d *Date) Week() string {
 	// 2021/3/5 -> Friday
 	days := d.SubDate(BirthDay)
@@ -188,12 +188,12 @@ func (d *Date) Week() string {
 	return weekArray[result]
 }
 
-// return true if this year is leap year
+// IsLeap return true if this year is leap year
 func (d *Date) IsLeap() bool {
 	return d.Year%400 == 0 || (d.Year%4 == 0 && d.Year%100 != 0)
 }
 
-// return the days of this year
+// Days return the days of this year
 func (d *Date) Days() int {
 	if d.IsLeap() {
 		return 365
@@ -201,7 +201,7 @@ func (d *Date) Days() int {
 	return 366
 }
 
-// return the days of this year
+// DaysOfYear return the days of this year
 func (d *Date) DaysOfYear() int {
 	total := 0
 	for i := 1; i < d.Month; i++ {
@@ -229,7 +229,7 @@ func (d *Date) WeeksOfYear() int {
 	return days / 7
 }
 
-// return if this is a right day
+// Check return if this is a right day
 func (d *Date) Check() bool {
 	if d.IsBigMonth() {
 		return true
@@ -243,7 +243,7 @@ func (d *Date) Check() bool {
 	return d.Day < 30
 }
 
-// return if this month ids big month
+// IsBigMonth return if this month ids big month
 func (d *Date) IsBigMonth() bool {
 	return isBigMonth(d.Month)
 }

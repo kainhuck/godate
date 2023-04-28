@@ -22,7 +22,7 @@ func TestDate(t *testing.T) {
 
 	//d := NewDateByStr("2021-3-6")
 	//fmt.Println(d.Week())
-	d1, err := NewDateByStr("2019-12-1")
+	d1, err := NewDateFromStr("2019-12-1")
 	if err != nil {
 		log.Fatal(err)
 	}
