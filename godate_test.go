@@ -1,6 +1,7 @@
 package godate
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -1385,5 +1386,15 @@ func Test_isLeapYear(t *testing.T) {
 				t.Errorf("isLeapYear() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestAddDaysOfYear2(t *testing.T) {
+	start, _ := NewDate(1970, 1, 1)
+	end := Today()
+
+	for start.EarlyThan(end) {
+		fmt.Println(start.String())
+		start.Increase()
 	}
 }
