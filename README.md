@@ -1,5 +1,7 @@
 # GoDate
 
+![GitHub](https://img.shields.io/github/license/kainhuck/godate) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/kainhuck/godate) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/kainhuck/godate)
+
 GoDate is a Go library for date manipulation, providing functions for creating, comparing, and calculating dates.
 
 ## Usage
