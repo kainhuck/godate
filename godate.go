@@ -6,10 +6,7 @@ import (
 )
 
 var (
-	monthArray          = [12]bool{true, false, true, false, true, false, true, true, false, true, false, true}
-	weekArray           = [7]string{Friday, Saturday, Sunday, Monday, Tuesday, Wednesday, Thursday}
-	commonMonthDayArray = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} // common year
-	leapMonthDayArray   = [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} // leap year
+	weekArray = [7]string{Friday, Saturday, Sunday, Monday, Tuesday, Wednesday, Thursday}
 )
 
 const (
@@ -28,19 +25,18 @@ type Date struct {
 	Day   int
 }
 
-// BirthDay this is th datetime when i create this project
-var BirthDay = &Date{
+// birthDay this is th datetime when i create this project
+var birthDay = &Date{
 	Year:  2021,
 	Month: 3,
 	Day:   5,
 }
 
+// NewDate
+// 通过指定的年月日创建一个 Date 实例，日期范围有误会报错
 func NewDate(year int, month int, day int) (*Date, error) {
-	if month <= 0 || month >= 13 {
-		return nil, fmt.Errorf("the number of months is out of the range")
-	}
-	if day <= 0 || day >= 32 {
-		return nil, fmt.Errorf("the number of days is out of the range")
+	if month < 1 || month > 12 || day < 1 || day > getDaysInMonth(year, month) {
+		return nil, fmt.Errorf("invalid date")
 	}
 
 	return &Date{
@@ -51,7 +47,7 @@ func NewDate(year int, month int, day int) (*Date, error) {
 }
 
 // NewDateFromStr
-// layout can be 2006-01-02 ...
+// 解析日期字符串到一个 Date 实例，默认的字符串格式为 2006-01-02 可以手动指定字符串格式
 func NewDateFromStr(dateStr string, layout ...string) (*Date, error) {
 
 	var formatString = "2006-01-02"
@@ -67,7 +63,8 @@ func NewDateFromStr(dateStr string, layout ...string) (*Date, error) {
 	return NewDate(t.Year(), int(t.Month()), t.Day())
 }
 
-// String return by string with format string or not
+// String
+// 将 Date 实例转成字符串输出，默认格式为 2006-01-02 可手动指定格式
 func (d *Date) String(layout ...string) string {
 	t := time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC)
 	format := "2006-01-02"
@@ -79,14 +76,16 @@ func (d *Date) String(layout ...string) string {
 	return t.Format(format)
 }
 
-// Increase add one day
+// Increase
+// 将当前对象天数+1
 func (d *Date) Increase() {
-	d.AddDay(1)
+	d.AddDays(1)
 }
 
-// Decrease sub one day
+// Decrease
+// 将当前对象天数-1
 func (d *Date) Decrease() {
-	d.SubDay(1)
+	d.SubDays(1)
 }
 
 func (d *Date) copy(x *Date) {
@@ -101,67 +100,104 @@ func (d *Date) clone() *Date {
 	return d1
 }
 
+// Equal
+// 判断当前日期是否和 x 相等
 func (d *Date) Equal(x *Date) bool {
-	return d.SubDate(x) == 0
+	return d.Year == x.Year && d.Month == x.Month && d.Day == x.Day
 }
 
+// EarlyThan
+// 判断当前日期是否早于 x
 func (d *Date) EarlyThan(x *Date) bool {
-	return d.SubDate(x) < 0
+	if d.Year < x.Year {
+		return true
+	} else if d.Year != x.Year {
+		return false
+	}
+	if d.Month < x.Month {
+		return true
+	} else if d.Month != x.Month {
+		return false
+	}
+
+	return d.Day < x.Day
 }
 
+// LaterThan
+// 判断当前日期是否晚于 x
 func (d *Date) LaterThan(x *Date) bool {
-	return d.SubDate(x) > 0
+	return !d.EarlyThanOrEqual(x)
 }
 
+// EarlyThanOrEqual
+// 判断当前日期是否不晚于 x
 func (d *Date) EarlyThanOrEqual(x *Date) bool {
-	return d.EarlyThan(x) && d.Equal(x)
+	return d.EarlyThan(x) || d.Equal(x)
 }
 
+// LaterThanOrEqual
+// 判断当前日期是否不早于 x
 func (d *Date) LaterThanOrEqual(x *Date) bool {
-	return d.LaterThan(x) && d.Equal(x)
+	return d.LaterThan(x) || d.Equal(x)
 }
 
-// AddDay add x days
-func (d *Date) AddDay(days int) {
-	d.copy(turnDaysToDate(d.DaysOfYear()+days-1, d.Year))
-}
-
-// SubDate sub one day
-func (d *Date) SubDate(x *Date) int {
-	dd := d.clone()
-	if dd.Year == x.Year {
-		return dd.DaysOfYear() - x.DaysOfYear()
-	} else if dd.Year > x.Year {
-		total := 0
-
-		for dd.Year > x.Year {
-			total += dd.Days()
-			dd.Year--
+// AddDays
+// 将档期日期加上 days 天
+func (d *Date) AddDays(days int) {
+	for i := 0; i < days; i++ {
+		d.Day++
+		if d.Day > d.DaysInMonth() {
+			d.Day = 1
+			d.Month++
+			if d.Month > 12 {
+				d.Month = 1
+				d.Year++
+			}
 		}
+	}
 
-		return dd.DaysOfYear() - x.DaysOfYear() + total
-	} else {
-		return -x.SubDate(d)
+	for i := 0; i > days; i-- {
+		d.Day--
+		if d.Day < 1 {
+			d.Month--
+			if d.Month < 1 {
+				d.Month = 12
+				d.Year--
+			}
+			d.Day = d.DaysInMonth()
+		}
 	}
 }
 
-// SubDay sub x days
-func (d *Date) SubDay(days int) {
-	d.copy(turnDaysToDate(d.DaysOfYear()-days-1, d.Year))
+// SubDays
+// 将当前日期减去 days 天
+func (d *Date) SubDays(days int) {
+	d.AddDays(-days)
 }
 
-func (d *Date) AddWeek(weeks int) {
-	d.AddDay(weeks * 7)
+// DaysDifference
+// 计算当前日期和 x 日期相差的天数
+func (d *Date) DaysDifference(x *Date) int {
+	d1 := d.clone()
+	d2 := x.clone()
+
+	if d1.Equal(d2) {
+		return 0
+	}
+
+	if d1.LaterThan(d2) {
+		return daysDifference(d1, d2)
+	}
+
+	return -daysDifference(d1, d2)
 }
 
-func (d *Date) SubWeek(weeks int) {
-	d.SubDay(weeks * 7)
-}
-
-// Week return what day is it today
+// Week
+// 返回今天是星期几
+// 返回的是 weekArray 中的常量
 func (d *Date) Week() string {
 	// 2021/3/5 -> Friday
-	days := d.SubDate(BirthDay)
+	days := d.DaysDifference(birthDay)
 
 	result := days % 7
 	if result < 0 {
@@ -171,154 +207,85 @@ func (d *Date) Week() string {
 	return weekArray[result]
 }
 
-// IsLeap return true if this year is leap year
-func (d *Date) IsLeap() bool {
-	return d.Year%400 == 0 || (d.Year%4 == 0 && d.Year%100 != 0)
+// IsLeapYear
+// 判断今年是否是闰年
+func (d *Date) IsLeapYear() bool {
+	return isLeapYear(d.Year)
 }
 
-// Days return the days of this year
-func (d *Date) Days() int {
-	if d.IsLeap() {
+// DaysInYear
+// 返回今年共有几天
+func (d *Date) DaysInYear() int {
+	if d.IsLeapYear() {
 		return 366
 	}
 	return 365
 }
 
-// DaysOfYear return the days of this year
-func (d *Date) DaysOfYear() int {
-	total := 0
-	for i := 1; i < d.Month; i++ {
-		if isBigMonth(i) {
-			total += 31
-		} else {
-			if i == 2 && d.IsLeap() {
-				total += 28
-			} else if i == 2 && !d.IsLeap() {
-				total += 29
-			} else {
-				total += 30
-			}
-		}
+// DayOfYear
+// 返回今天是这一年中的第几天
+func (d *Date) DayOfYear() int {
+	days := d.Day
+	for month := 1; month < d.Month; month++ {
+		days += getDaysInMonth(d.Year, month)
 	}
-	total += d.Day
-	return total
+	return days
 }
 
-func (d *Date) WeeksOfYear() int {
-	days := d.DaysOfYear()
+// WeekOfYear
+// 返回这个星期是这年中的第几个星期
+func (d *Date) WeekOfYear() int {
+	days := d.DayOfYear()
 	if days%7 != 0 {
 		return days/7 + 1
 	}
 	return days / 7
 }
 
-// Check return if this is a right day
-func (d *Date) Check() bool {
-	if d.IsBigMonth() {
-		return true
-	}
-	if d.Month != 2 {
-		return d.Day < 31
-	}
-	if d.IsLeap() {
-		return d.Day < 29
-	}
-	return d.Day < 30
+// DaysInMonth
+// 返回这个月共有几天
+func (d *Date) DaysInMonth() int {
+	return getDaysInMonth(d.Year, d.Month)
 }
 
-// IsBigMonth return if this month ids big month
-func (d *Date) IsBigMonth() bool {
-	return isBigMonth(d.Month)
+// IsValid
+// 检查当前日期是否正确
+func (d *Date) IsValid() bool {
+	if d.Year < 0 || d.Month < 1 || d.Month > 12 || d.Day < 1 {
+		return false
+	}
+
+	daysInMonth := d.DaysInMonth()
+	if d.Day > daysInMonth {
+		return false
+	}
+
+	return true
 }
 
-func isBigMonth(m int) bool {
-	return monthArray[m-1]
+// AddDaysOfYear
+// 将某年的第几天转成日期，注意如果days超过当年天数，则会顺延到下一年
+func AddDaysOfYear(days int, year int) *Date {
+	date := Date{Year: year, Month: 1, Day: 1}
+
+	for days > date.DaysInYear() {
+		days -= date.DaysInYear()
+		date.Year++
+	}
+
+	date.Month = 1
+	for days > getDaysInMonth(date.Year, date.Month) {
+		days -= getDaysInMonth(date.Year, date.Month)
+		date.Month++
+	}
+
+	date.Day = days
+
+	return &date
 }
 
-func turnDaysToDate(days int, year int) *Date {
-	d := &Date{
-		Year:  year,
-		Month: 1,
-		Day:   1,
-	}
-
-	if days == 1 {
-		return d
-	}
-
-	if days > 0 {
-		if d.IsLeap() && days > 366 {
-			return turnDaysToDate(days-366, year+1)
-		}
-		if !d.IsLeap() && days > 365 {
-			return turnDaysToDate(days-365, year+1)
-		}
-
-		monthDay := commonMonthDayArray
-		if d.IsLeap() {
-			monthDay = leapMonthDayArray
-		}
-
-		for i := 1; i <= 12; i++ {
-			if days > monthDay[i-1] {
-				d.Month++
-				days -= monthDay[i-1]
-			} else {
-				break
-			}
-		}
-
-		d.Day = days
-
-		return d
-
-	}
-
-	d = &Date{
-		Year:  year - 1,
-		Month: 12,
-		Day:   31,
-	}
-
-	if days == 0 {
-		return d
-	}
-
-	if d.IsLeap() && -days > 366 {
-		return turnDaysToDate(days+366, d.Year)
-	}
-
-	if !d.IsLeap() && -days > 365 {
-		return turnDaysToDate(days+365, d.Year)
-	}
-
-	monthDay := commonMonthDayArray
-	if d.IsLeap() {
-		monthDay = leapMonthDayArray
-	}
-
-	i := 11
-
-	for i > 0 {
-		if -days > monthDay[i] {
-			d.Month--
-			days += monthDay[i]
-		} else {
-			break
-		}
-
-		i--
-	}
-
-	d.Day = monthDay[i] + days
-
-	return d
-}
-
-func (d *Date) Accurate(days int) {
-	d.copy(turnDaysToDate(days, d.Year))
-}
-
+// Today
+// 返回今天日期
 func Today() *Date {
 	t := time.Now()
 	year, month, day := t.Date()
@@ -327,20 +294,64 @@ func Today() *Date {
 	return d
 }
 
+// IsToday
+// 判断指定的日期是否是今天
 func (d *Date) IsToday() bool {
 	return d.Equal(Today())
 }
 
-// BeginOfThisYear return the first day of this year
+// BeginOfThisYear
+// 返回当前日期所在年份的第一天
 func (d *Date) BeginOfThisYear() *Date {
 	d1, _ := NewDate(d.Year, 1, 1)
 
 	return d1
 }
 
-// BeginOfThisMonth return the first day of this month
+// BeginOfThisMonth
+// 返回当前日期所在月份的第一天
 func (d *Date) BeginOfThisMonth() *Date {
 	d1, _ := NewDate(d.Year, d.Month, 1)
 
 	return d1
+}
+
+// =========== helper ===========
+
+func getDaysInMonth(year, month int) int {
+	switch month {
+	case 2:
+		if isLeapYear(year) {
+			return 29
+		}
+		return 28
+	case 4, 6, 9, 11:
+		return 30
+	default:
+		return 31
+	}
+}
+
+func isLeapYear(year int) bool {
+	return year%400 == 0 || (year%4 == 0 && year%100 != 0)
+}
+
+func daysDifference(d1, d2 *Date) int {
+	if d1.Equal(d2) {
+		return 0
+	}
+
+	// 确保 d1 大于 d2
+	if d1.EarlyThan(d2) {
+		d1, d2 = d2, d1
+	}
+
+	diff := 0
+
+	for d1.Year > d2.Year {
+		diff += d2.DaysInYear()
+		d2.Year++
+	}
+
+	return diff + d1.DayOfYear() - d2.DayOfYear()
 }
