@@ -33,6 +33,17 @@ func main() {
 	}
 	fmt.Println("Date 2:", date2)
 }
+
+func demo() {
+	start, _ := godate.NewDate(1970, 1, 1)
+	end := godate.Today()
+
+	for start.EarlyThan(end) {
+		fmt.Println(start.String())
+		start.Increase()
+	}
+}
+
 ```
 
 ### Date Operations
