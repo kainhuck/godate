@@ -290,6 +290,11 @@ func (d *Date) BeginOfThisMonth() *Date {
 	return d1
 }
 
+// ToTimestamp converts the Date instance to a Unix timestamp (int64).
+func (d *Date) ToTimestamp() int64 {
+	return time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC).Unix()
+}
+
 // =========== helper ===========
 
 func getDaysInMonth(year, month int) int {
